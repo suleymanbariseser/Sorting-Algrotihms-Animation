@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: black;
+        }
+
+        canvas {
+            background-color: black;
+        }
+
+        .info {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            top: 0;
+            position: absolute;
+            padding: 1rem;
+            font-size: 2rem;
+            font-weight: bolder;
+            color: red
+        }
+
+        #shuffle {
+            color: red;
+            position: absolute;
+            top: 0;
+            font-size: 5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .row {
+            display: flex;
+            width: 100%;
+            font-size: 5rem;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="info">
+        <div id="sorting">Selection Sort</div>
+        <div id="timer">0</div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="shuffle" class="hidden">Shuffling</div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script>
+        window.onresize = () =>{
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        const updateInfo = () => {
+            date = new Date();
+            timer_result = (date.getTime() - startTime) / 1000
+            timer.innerHTML = timer_result + "s";
+        }
+
+        const createArray = () => {
+            for (let i = 0; i < 5000; i++) {
+                array.push((Math.random() * 100 + 1));
+            }
+        }
+
+        const drawCanvas = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < array.length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / array.length * i, canvas.height);
+                ctx.lineTo(canvas.width / array.length * i, canvas.height - canvas.height / 100 * array[i]);
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+            }
+
+        }
+        const SelectionSort = (callback) => {
+            const n = array.length;
+            let i = 0;
+            let sort = setInterval(function() {
+                if (i < n - 1) {
+                    // Find the minimum element in unsorted array 
+                    let min_idx = i;
+                    for (let j = i + 1; j < n; j++)
+                        if (array[j] < array[min_idx])
+                            min_idx = j;
+
+                    // Swap the found minimum element with the first 
+                    // element 
+                    let temp = array[min_idx];
+                    array[min_idx] = array[i];
+                    array[i] = temp;
+                    drawCanvas();
+                    i++;
+                } else {
+                    clearInterval(sort);
+                    algorithms.push({
+                        name: "selection sort",
+                        time: timer_result
+                    });
+                    $('.info').toggleClass('hidden');
+                    shuffle(function() {
+                        callback();
+                    });
+                }
+                updateInfo();
+            }, 1);
+        }
+
+        const BubbleSort = (callback) => {
+            $('.info').toggleClass('hidden');
+            startTime = (new Date()).getTime();
+            $('#sorting').html('Bubble Sort');
+            const n = array.length;
+            let i = 0;
+            const bubble = setInterval(() => {
+                if (i < n - 1) {
+                    for (let j = 0; j < n - i - 1; j++)
+                        if (array[j] > array[j + 1]) {
+                            // swap arr[j+1] and arr[i] 
+                            let temp = array[j];
+                            array[j] = array[j + 1];
+                            array[j + 1] = temp;
+                        }
+                    i++;
+                    drawCanvas();
+                } else {
+                    clearInterval(bubble);
+                    algorithms.push({
+                        name: "bubble sort",
+                        time: timer_result
+                    });
+                    $('.info').toggleClass('hidden');
+                    shuffle(function() {
+                        callback();
+                    });
+                }
+                updateInfo();
+            }, 1);
+        }
+
+        const InsertionSort = (callback) => {
+            const n = array.length;
+            let i = 1;
+            $('.info').toggleClass('hidden');
+            startTime = (new Date()).getTime();
+            $('#sorting').html('Insertion Sort');
+            const insertion = setInterval(() => {
+                if (i < n) {
+                    let key = array[i];
+                    let j = i - 1;
+                    while (j >= 0 && array[j] > key) {
+                        array[j + 1] = array[j];
+                        j = j - 1;
+                    }
+                    array[j + 1] = key;
+                    i++;
+                    drawCanvas();
+                } else {
+                    clearInterval(insertion);
+                    algorithms.push({
+                        name: "insertion sort",
+                        time: timer_result
+                    });
+                    $('.info').toggleClass('hidden');
+                    callback();
+                }
+                updateInfo();
+            }, 1);
+        }
+
+        function shuffle(callback) {
+            $('#shuffle').toggleClass('hidden');
+            let i = array.length - 1;
+            const shuff = setInterval(function() {
+                if (i > 0) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                    i--;
+                } else {
+                    clearInterval(shuff);
+                    $('#shuffle').toggleClass('hidden');
+                    callback();
+                }
+                drawCanvas();
+            }, 1);
+        }
+
+        const test = async () => {
+            const result = await sortArray();
+            console.log(result);
+        }
+
+        let algorithms = [];
+        const canvas = document.querySelector('#canvas');
+        const ctx = canvas.getContext('2d');
+        const array = [];
+        const timer = document.querySelector('#timer');
+        let date = new Date();
+        let timer_result = 0;
+        let startTime = date.getTime();
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        createArray();
+        drawCanvas();
+        SelectionSort(function() {
+            BubbleSort(function() {
+                InsertionSort(function() {
+
+                    let htmlAlgorithms = algorithms.map(element =>
+                        "<div class='row'> " + element.name + " " + element.time + "</div>");
+                    //console.log(htmlAlgorithms);
+                    $('#shuffle').html(htmlAlgorithms);
+                    $('#shuffle').toggleClass('hidden');
+                });
+            });
+        });
+    </script>
+</body></html>
